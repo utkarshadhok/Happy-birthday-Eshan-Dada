@@ -20,7 +20,9 @@ if (scoreDisplay) {
   scoreDisplay.textContent = score;
 }
 
-fetch("./data/cards.json")
+const DATA_URL = "./data/cards.json?v=2";
+
+fetch(DATA_URL)
   .then((res) => res.json())
   .then((data) => {
     cards = [...data, ...data];
@@ -53,12 +55,19 @@ function generateCards() {
     const cardElement = document.createElement("div");
     cardElement.classList.add("card");
     cardElement.setAttribute("data-name", card.name);
-    cardElement.innerHTML = `
-      <div class="front">
-        <img class="front-image" src=${card.image} />
-      </div>
-      <div class="back"></div>
-    `;
+
+    const front = document.createElement("div");
+    front.classList.add("front");
+    const img = document.createElement("img");
+    img.classList.add("front-image");
+    img.src = resolveAssetPath(card.image);
+    front.appendChild(img);
+
+    const back = document.createElement("div");
+    back.classList.add("back");
+
+    cardElement.appendChild(front);
+    cardElement.appendChild(back);
     gridContainer.appendChild(cardElement);
     cardElement.addEventListener("click", flipCard);
   }
@@ -146,6 +155,11 @@ function restart() {
   hideCelebrationOverlay();
   gridContainer.innerHTML = "";
   generateCards();
+}
+
+function resolveAssetPath(path) {
+  const normalized = path.startsWith("./") ? path.slice(2) : path;
+  return new URL(normalized, window.location.href).href;
 }
 
 function showCelebrationOverlay() {
